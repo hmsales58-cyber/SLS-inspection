@@ -1,0 +1,131 @@
+import React from 'react';
+import { InspectionItem, ReportHeader, ChecklistState, CHECKLIST_ITEMS } from '../types';
+
+interface PrintLayoutProps {
+  header: ReportHeader;
+  items: InspectionItem[];
+  checklist: ChecklistState;
+}
+
+export const PrintLayout: React.FC<PrintLayoutProps> = ({ header, items, checklist }) => {
+  const totalPcs = items.reduce((sum, item) => sum + (Number(item.pcs) || 0), 0);
+
+  return (
+    <div className="hidden print:block w-full max-w-[210mm] mx-auto p-20 bg-white text-black font-sans min-h-screen flex flex-col">
+      {/* Branding Header */}
+      <div className="flex flex-col items-center mb-16 border-b-4 border-black pb-16 text-center">
+         <div className="w-48 h-48 flex items-center justify-center mb-8 relative rounded-full bg-black border-4 border-black overflow-hidden">
+             <img src="logo.png" alt="Secured" className="w-full h-full object-contain p-2" onError={(e) => {
+                 (e.target as HTMLImageElement).style.display = 'none';
+                 const parent = (e.target as HTMLImageElement).parentElement;
+                 if (parent) {
+                     const placeholder = document.createElement('div');
+                     placeholder.className = "flex flex-col items-center justify-center text-white p-4 h-full w-full text-center";
+                     placeholder.innerHTML = `<span class="text-3xl font-black leading-none tracking-tighter">SECURED</span><span class="text-[8px] font-bold mt-2 tracking-[0.5em] uppercase">LOGISTICS SOLUTION</span>`;
+                     parent.appendChild(placeholder);
+                 }
+             }} />
+         </div>
+         <h1 className="text-3xl font-black uppercase tracking-widest text-black mb-4">Secured Logistics Solution FZCO</h1>
+         <div className="text-[13px] font-black text-slate-700 space-y-1 uppercase tracking-[0.3em]">
+             <p>Dubai Airport Free Zone | UAE</p>
+             <p className="text-black font-black mt-4 border-t-2 border-black pt-4">CERTIFIED INSPECTION & COMPLIANCE REPORT</p>
+         </div>
+      </div>
+
+      {/* Meta Summary */}
+      <div className="grid grid-cols-2 gap-24 mb-16 text-xs">
+        <div className="space-y-8">
+           <div>
+             <span className="block font-black text-slate-400 uppercase text-[10px] tracking-[0.4em] mb-2">Company Entity</span>
+             <span className="block text-3xl font-black text-black">{header.companyName || '-'}</span>
+           </div>
+           <div>
+             <span className="block font-black text-slate-400 uppercase text-[10px] tracking-[0.4em] mb-2">Customer Code</span>
+             <span className="block text-2xl font-mono font-bold tracking-widest">{header.customerCode || '-'}</span>
+           </div>
+        </div>
+        <div className="space-y-8 text-right">
+           <div>
+             <span className="block font-black text-slate-400 uppercase text-[10px] tracking-[0.4em] mb-2">Audit Date</span>
+             <span className="block text-2xl font-black">{header.date}</span>
+           </div>
+           <div>
+             <span className="block font-black text-slate-400 uppercase text-[10px] tracking-[0.4em] mb-2">Shift Window</span>
+             <span className="block text-2xl font-black">{header.startTime} - {header.endTime}</span>
+           </div>
+        </div>
+      </div>
+
+      {/* Inventory Table */}
+      <div className="mb-16">
+        <h3 className="font-black text-[12px] uppercase tracking-[0.5em] text-slate-400 mb-8">Verified Unit Inventory</h3>
+        <table className="w-full border-collapse text-[11px]">
+          <thead>
+            <tr className="bg-black text-white">
+              <th className="py-5 px-6 text-left font-black uppercase tracking-widest w-[40%]">Manufacturer Model</th>
+              <th className="py-5 px-3 text-center font-black uppercase tracking-widest">RAM/GB</th>
+              <th className="py-5 px-3 text-center font-black uppercase tracking-widest">Color</th>
+              <th className="py-5 px-3 text-center font-black uppercase tracking-widest">SPEC</th>
+              <th className="py-5 px-6 text-center font-black uppercase tracking-widest">Qty</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y-2 divide-slate-100 border-b-4 border-black">
+            {items.map((item, idx) => (
+              <tr key={item.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                <td className="py-6 px-6 font-black text-black text-lg">{item.model || '-'}</td>
+                <td className="py-6 px-3 text-center font-black text-slate-700">{item.gb || '-'}</td>
+                <td className="py-6 px-3 text-center text-slate-600 font-bold">{item.color || '-'}</td>
+                <td className="py-6 px-3 text-center font-mono font-black text-[10px] text-black tracking-tighter">{item.spec || '-'}</td>
+                <td className="py-6 px-6 text-center font-black text-3xl text-black">{item.pcs || 0}</td>
+              </tr>
+            ))}
+             <tr className="bg-slate-200">
+                <td colSpan={4} className="py-8 px-8 text-right font-black text-black uppercase text-[13px] tracking-widest">Total Audited Units:</td>
+                <td className="py-8 px-6 text-center font-black text-black text-4xl border-l-4 border-black">{totalPcs}</td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Checklist Audit Results */}
+      <div className="mb-20 bg-slate-50 p-16 rounded-[4rem] border-2 border-slate-100">
+        <h3 className="font-black text-[11px] uppercase tracking-[0.6em] text-black mb-12 border-b-4 border-white pb-6">Quality Compliance matrix</h3>
+        <div className="grid grid-cols-2 gap-x-24 gap-y-8">
+            {CHECKLIST_ITEMS.map((key) => (
+                <div key={key} className="flex items-center justify-between text-[13px]">
+                    <div className="flex items-center gap-6">
+                        <div className={`w-8 h-8 border-2 flex items-center justify-center rounded-xl transition-all ${checklist[key].checked ? 'bg-black border-black text-white shadow-md' : 'border-slate-300 bg-white'}`}>
+                             {checklist[key].checked && <span className="font-black text-[14px]">✓</span>}
+                        </div>
+                        <span className={`font-black uppercase tracking-tighter ${checklist[key].checked ? 'text-black' : 'text-slate-300'}`}>{key}</span>
+                    </div>
+                    {checklist[key].checked && (
+                         <div className="font-black text-2xl border-b-4 border-black px-12 min-w-[100px] text-center text-black">
+                            {checklist[key].count}
+                         </div>
+                    )}
+                </div>
+            ))}
+        </div>
+      </div>
+
+      {/* Certification Signature */}
+      <div className="flex items-end justify-between pt-20 border-t-4 border-slate-100 mt-auto">
+         <div className="w-[45%]">
+            <div className="mb-16">
+                <span className="font-black text-[12px] text-slate-400 uppercase tracking-[0.5em] block mb-6">Assigned Audit Inspector</span>
+                <div className="text-3xl font-black text-black border-b-4 border-slate-200 pb-4 uppercase tracking-tighter">{header.checkedBy}</div>
+            </div>
+         </div>
+         <div className="w-[45%] text-right">
+             <div className="mb-16">
+                 <span className="font-black text-[12px] text-slate-400 uppercase tracking-[0.5em] block mb-6">Authorized Verification Signature</span>
+                 <div className="border-b-4 border-black h-24 w-full mb-6"></div>
+                <div className="text-lg font-black text-center uppercase tracking-[0.4em] text-black">Hussein Badawi</div>
+             </div>
+         </div>
+      </div>
+    </div>
+  );
+};
