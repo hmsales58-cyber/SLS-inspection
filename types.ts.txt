@@ -1,0 +1,51 @@
+export interface InspectionItem {
+  id: string;
+  model: string;
+  gb: string;
+  pcs: number;
+  color: string;
+  coo: string; // Country of Origin
+  spec: string; // Part Number
+  remarks: string;
+}
+
+export interface ReportHeader {
+  companyName: string;
+  customerCode: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  checkedBy: string;
+}
+
+export const DEFAULT_HEADER: ReportHeader = {
+  companyName: "",
+  customerCode: "",
+  date: new Date().toISOString().split('T')[0],
+  startTime: "",
+  endTime: "",
+  checkedBy: "Hussein Badawi"
+};
+
+export const CHECKLIST_ITEMS = [
+  'PACK ORIGINAL',
+  'BOX OUT SIDE DAMAGE',
+  'OUT SIDE DAMAGE',
+  'PACK OPEN',
+  'DAMAGE PCS',
+  'ACTIVE PCS',
+  'UNCLEAN / STICKER BOX',
+  'LOOSE BOX',
+  'OPEN MASTER',
+  'MASTER',
+  'STICKERS PCS'
+] as const;
+
+export type ChecklistItemKey = typeof CHECKLIST_ITEMS[number];
+
+export type ChecklistState = Record<ChecklistItemKey, { checked: boolean; count: number }>;
+
+export const DEFAULT_CHECKLIST: ChecklistState = CHECKLIST_ITEMS.reduce((acc, item) => ({
+  ...acc,
+  [item]: { checked: false, count: 0 }
+}), {} as ChecklistState);
